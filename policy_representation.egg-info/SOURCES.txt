@@ -1,0 +1,11 @@
+README.md
+setup.py
+policy_representation/__init__.py
+policy_representation/bait_classifier.py
+policy_representation/convert_trajectories.py
+policy_representation/utils.py
+policy_representation.egg-info/PKG-INFO
+policy_representation.egg-info/SOURCES.txt
+policy_representation.egg-info/dependency_links.txt
+policy_representation.egg-info/not-zip-safe
+policy_representation.egg-info/top_level.txt
