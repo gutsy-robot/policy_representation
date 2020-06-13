@@ -30,7 +30,7 @@ Training your Own Models
 ---
 
 You can avoid this part if you don't plan to train your own model and just want to use a pretrained
-model that has been provided in the repo, for that just switch to the next section.
+model that has been provided in the repo, for that just switch to the evaluation section.
 
 Data Preparation for Training Your Own Models
 ---
@@ -60,7 +60,7 @@ Your files should be present in the following directory structure:
 Running an Experiment
 --
 
-An example is given in run_experiments.py which combines the above steps, it does the following:
+An example is given in run_experiments.py which does the following:
 
 1. Prepares training and validation data for both agent classification and agent policy encoder.
 2. Trains agent classifier and saves it training plots. 
@@ -159,9 +159,7 @@ In your plots directory the following will be saved:
         --> pca_test_<experiment_params>.png  (for validation data)
 
 <experiment_params> is a string which specifies the choice of your model. For example, if you choose
-to use actions as well in the input and an auxiliary agent classifier as well. 
-
-The <experiment_params> would be _use_actions_use_classifier. This is helpful so that when you change
+to use actions as well in the input and an auxiliary agent classifier as well, the <experiment_params> would be _use_actions_use_classifier. This is helpful so that when you change
 these conditions to something else the plots can be stored under the same experiment directory.
 
 An example of the generated pca plot is shown below
@@ -203,7 +201,7 @@ This kind of plot would be generated
 In the above figure, the subtrajectories(generated based on your specified embeddings_gen_interval) are plotted in
 green along with the pca of the training trajectory embeddings. 
 
-Please follow the script json_example.py to follow step by step how to load and process json
+Please follow the script [json_example.py](https://github.com/gutsy-robot/policy_representation/blob/master/json_example.py) to follow step by step how to load and process json
 and measure similarity with agent embeddings which were used to train the model.
    
 Online Evaluation During Human-Agent Teaming
