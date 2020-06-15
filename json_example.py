@@ -25,7 +25,7 @@ agent_states, agent_actions = get_agent_trajectory(states, actions, agent_id=age
 # scale the state and actions.
 agent_states, agent_actions = scale_state(agent_states), scale_action(agent_actions)
 
-use_actions = model.layers[0].input_shape == 19
+use_actions = model.layers[0].input_shape[-1] == 19
 
 if use_actions:
     inp = np.hstack((agent_states, agent_actions))
@@ -70,5 +70,4 @@ for j in range(0, len(pca_emb)):
 json_pca_emb = pca.transform(json_embedding)
 ax_pca.scatter(json_pca_emb[:, 0], json_pca_emb[:, 1], label="json")
 ax_pca.legend()
-
 plt.show()
