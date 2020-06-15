@@ -24,7 +24,7 @@ agents = 'Turn_Only_Shooter5_Bait_Sid7 ' \
 
 # path to your json file.
 json = 'shooter-turn-2-2020-06-05-16-16-56.json'
-epochs = 1
+epochs = 20
 # ==============
 
 # generate training data.
