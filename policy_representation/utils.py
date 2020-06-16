@@ -318,7 +318,7 @@ def plot_pca_embeddings(emb, num_baits, y_train, data_path, experiment_name, tes
                         agent_key=None, suffix=''):
     fig_pca, ax_pca = plt.subplots()
     fig_pca.suptitle('PCA')
-
+    print("agent key: ", agent_key)
     pca_emb = []
     for k in range(num_baits):
         pca_emb.append(emb[np.argwhere(y_train == k).flatten()])
@@ -360,16 +360,23 @@ def scale_state(trajectory, x_min=-355.0, x_max=355.0,
     y_indices = [5, 11, 14]
     velocity_indices = [7, 8]
 
+    # print("x_max: ", np.max(trajectory[:, x_indices]))
+    # print("y_max: ", np.max(trajectory[:, x_indices]))
     trajectory[:, angle_indices] = (trajectory[:, angle_indices] - (-angle_max)) / (2 * angle_max)
     trajectory[:, velocity_indices] = (trajectory[:, velocity_indices] - (-max_speed)) / (2 * max_speed)
     # trajectory[:, velocity_indices] /= max_speed
+    # print("x_max: ", np.max(trajectory[:, x_indices] - x_min))
+    # print("x_max: ", np.max((trajectory[:, x_indices] - x_min) / (x_max - x_min)))
+
     trajectory[:, x_indices] = (trajectory[:, x_indices] - x_min) / (x_max - x_min)
-    trajectory[:, y_indices] = (trajectory[:, y_indices] - x_min) / (y_max - y_min)
+    trajectory[:, y_indices] = (trajectory[:, y_indices] - y_min) / (y_max - y_min)
 
     assert np.max(trajectory[:, angle_indices]) <= 1 and np.min(trajectory[:, angle_indices]) >= 0
     assert np.max(trajectory[:, velocity_indices]) <= 1 and np.min(trajectory[:, velocity_indices]) >= 0
-    assert np.max(trajectory[:, x_indices]) <= 1 and np.min(trajectory[:, x_indices]) >= 0
-    assert np.max(trajectory[:, y_indices]) <= 1 and np.min(trajectory[:, y_indices]) >= 0
+    # print(np.max(trajectory[:, x_indices]), np.min(trajectory[:, x_indices]))
+
+    assert np.max(trajectory[:, x_indices]) <= 1.1 and np.min(trajectory[:, x_indices]) >= -0.1
+    assert np.max(trajectory[:, y_indices]) <= 1.1 and np.min(trajectory[:, y_indices]) >= -0.1
 
     return trajectory
 
@@ -675,3 +682,28 @@ def plot_json_embeddings(opts, embeddings):
     ax_test.legend()
     fig.savefig(opts.plots_path + opts.experiment_name + '/pca_json.png')
     fig_test.savefig(opts.plots_path + opts.experiment_name + '/pca_test_json.png')
+
+
+def evaluate_performance(log, bait_id=1):
+
+    """
+
+    processes a json file and returns number of fortress kills and bait deaths.
+
+    """
+
+    ep_fortress_status, ep_bait_status = [], []
+
+    for state in log['game_states']:
+
+        ep_fortress_status.append(state["fortresses"][str(0)]["alive"])
+        ep_bait_status.append(state["players"][str(bait_id)]["alive"])
+
+    num_fortress_kills, num_bait_deaths = 0, 0
+    for k in range(len(ep_bait_status) - 1):
+        if ep_bait_status[k] and not ep_bait_status[k + 1]:
+            num_bait_deaths += 1
+        if ep_fortress_status[k] and not ep_fortress_status[k + 1]:
+            num_fortress_kills += 1
+
+    return num_fortress_kills, num_bait_deaths
