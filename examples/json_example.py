@@ -7,13 +7,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 
+
+"""
+
+This example demonstrates how to generate embeddings from a saved json file and show a pca plot of the 
+
+embeddings from json and compares it to the training trajectories.
+
+"""
+
+
+# specify the id of the agent for which you wish to generate embeddings for from your json.
+# should be either 0 or 1.
+# also be careful that you are using the a bait policy representation model for the bait in your json
+# and a shooter model for shooter.
 agent_id = 1
-json_path = 'shooter-turn-2-2020-06-05-16-16-56.json'
+
+
+json_path = '../json/shooter-turn-2-2020-06-05-16-16-56.json'
 with open(json_path) as f:
     log = json.load(f)
 
 # load model
-model_path = 'models/ae.h5'
+model_path = '../models/ae.h5'
 model = load_model(model_path)
 
 # extract the combined state and actions.
@@ -35,11 +51,12 @@ else:
 
 json_embedding = model.predict(inp.reshape((1, inp.shape[0], inp.shape[1])))
 
-# load stored agent trajectories for comparison.
-agent_trajectories = np.load('trajectories/X_train.npy')
-agent_labels = np.load('trajectories/y_train.npy')
 
-with open("trajectories/agent_key.txt", "rb") as fp:
+# load stored agent trajectories for comparison.
+agent_trajectories = np.load('../trajectories/X_train.npy')
+agent_labels = np.load('../trajectories/y_train.npy')
+
+with open("../trajectories/agent_key.txt", "rb") as fp:
     agent_key = pickle.load(fp)
 
 if not use_actions:
@@ -47,6 +64,8 @@ if not use_actions:
 
 # agent embeddings can be used to find similarity with the json_embedding.
 agent_embeddings = model.predict(agent_trajectories)
+print("agent embeddings generated successfully")
+
 
 # for visulisation
 fig_pca, ax_pca = plt.subplots()
