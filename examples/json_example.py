@@ -108,12 +108,6 @@ for embedding in embeddings_list:
     json_pca_emb.append(pca_emb)
 #
 json_pca_emb = np.array(json_pca_emb)
-# print("shape of json_pca_emb is: ", json_pca_emb.shape)
-# ax_pca.scatter(json_pca_emb[:, :, 0], json_pca_emb[:, :, 1], label="yikang_human")
-# ax_pca.legend()
-# plt.show()
-
-# json_pca_emb = pca.transform(json_embedding)
 ax_pca.scatter(json_pca_emb[:, :, 0], json_pca_emb[:, :, 1], label="json")
 ax_pca.legend()
 plt.show()
