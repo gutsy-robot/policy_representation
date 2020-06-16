@@ -24,6 +24,10 @@ embeddings from json and compares it to the training trajectories.
 agent_id = 1
 
 
+# after how many timesteps you wish to run the policy representation model on the json.
+# if you just want to generate one embedding for the whole json specify this as the number of time steps in your json.
+embedding_interval = 10
+
 json_path = '../json/shooter-turn-2-2020-06-05-16-16-56.json'
 with open(json_path) as f:
     log = json.load(f)
@@ -49,7 +53,19 @@ if use_actions:
 else:
     inp = agent_states
 
-json_embedding = model.predict(inp.reshape((1, inp.shape[0], inp.shape[1])))
+embeddings_list = []
+ind = embedding_interval
+while ind < len(inp):
+    input = inp[:ind, :]
+    input = input.reshape((1, input.shape[0], input.shape[1]))
+    embeddings_list.append(model.predict(input))
+    ind += embedding_interval
+
+embeddings_list.append(model.predict(inp.reshape((1, inp.shape[0], inp.shape[1]))))
+
+embeddings_list = np.array(embeddings_list)
+
+# json_embedding = model.predict(inp.reshape((1, inp.shape[0], inp.shape[1])))
 
 
 # load stored agent trajectories for comparison.
@@ -86,7 +102,18 @@ for j in range(0, len(pca_emb)):
     else:
         ax_pca.scatter(pca_emb[j][:, 0], pca_emb[j][:, 1], label=agent_key[j])
 
-json_pca_emb = pca.transform(json_embedding)
-ax_pca.scatter(json_pca_emb[:, 0], json_pca_emb[:, 1], label="json")
+json_pca_emb = []
+for embedding in embeddings_list:
+    pca_emb = pca.transform(embedding)
+    json_pca_emb.append(pca_emb)
+#
+json_pca_emb = np.array(json_pca_emb)
+# print("shape of json_pca_emb is: ", json_pca_emb.shape)
+# ax_pca.scatter(json_pca_emb[:, :, 0], json_pca_emb[:, :, 1], label="yikang_human")
+# ax_pca.legend()
+# plt.show()
+
+# json_pca_emb = pca.transform(json_embedding)
+ax_pca.scatter(json_pca_emb[:, :, 0], json_pca_emb[:, :, 1], label="json")
 ax_pca.legend()
 plt.show()
