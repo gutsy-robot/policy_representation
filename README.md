@@ -10,7 +10,8 @@ From inside of the root directory, do a:
 
     pip install -e .
 
-- `pip install Keras` requires tensorflow >= 2.2
+- `pip install Keras` requires tensorflow >= 2.2 and cudnn >= 7.6.4?
+- pytorch 1.5
 
     
 Method
