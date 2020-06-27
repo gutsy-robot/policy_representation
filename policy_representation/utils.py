@@ -69,6 +69,7 @@ def load_data(agent_ids, agents_path, train_on_states_only=False, load_baits=Tru
             train_y.append(i)
 
     train_x, train_y = np.array(train_x), np.array(train_y)
+    print("all data", train_x.shape, train_y.shape)
 
     # shuffle data
     X_train, X_test, y_train, y_test = train_test_split(train_x, train_y, test_size=0.2, random_state=42)
@@ -342,7 +343,7 @@ def plot_pca_embeddings(emb, num_baits, y_train, data_path, experiment_name, tes
 
 
 def scale_state(trajectory, x_min=-355.0, x_max=355.0,
-                y_min=-310.0, y_max=310.0, max_speed=180.0, angle_max=360.0):
+                y_min=-310.0, y_max=310.0, max_speed=180.0, angle_max=360.0, target_max=1.0):
     """
 
     trajectory: (timesteps, bait/shooter state)
@@ -353,12 +354,16 @@ def scale_state(trajectory, x_min=-355.0, x_max=355.0,
 
     max_speed: Max speed in the tsf game.
 
+    scale to [0, 1] but target in [-1, 1]?
     """
     assert len(trajectory.shape) == 2
     angle_indices = [0, 6, 12, 15]
     x_indices = [4, 10, 13]
     y_indices = [5, 11, 14]
     velocity_indices = [7, 8]
+    target_index = [2]
+
+    trajectory[:, target_index] = (trajectory[:, target_index] - (-target_max)) / (2 * target_max)
 
     # print("x_max: ", np.max(trajectory[:, x_indices]))
     # print("y_max: ", np.max(trajectory[:, x_indices]))
@@ -371,17 +376,20 @@ def scale_state(trajectory, x_min=-355.0, x_max=355.0,
     trajectory[:, x_indices] = (trajectory[:, x_indices] - x_min) / (x_max - x_min)
     trajectory[:, y_indices] = (trajectory[:, y_indices] - y_min) / (y_max - y_min)
 
+    assert np.max(trajectory[:, target_index]) <= 1 and np.min(trajectory[:, target_index]) >= 0
+
     assert np.max(trajectory[:, angle_indices]) <= 1 and np.min(trajectory[:, angle_indices]) >= 0
     assert np.max(trajectory[:, velocity_indices]) <= 1 and np.min(trajectory[:, velocity_indices]) >= 0
     # print(np.max(trajectory[:, x_indices]), np.min(trajectory[:, x_indices]))
 
-    assert np.max(trajectory[:, x_indices]) <= 1.1 and np.min(trajectory[:, x_indices]) >= -0.1
-    assert np.max(trajectory[:, y_indices]) <= 1.1 and np.min(trajectory[:, y_indices]) >= -0.1
+    assert np.max(trajectory[:, x_indices]) <= 1 and np.min(trajectory[:, x_indices]) >= 0
+    assert np.max(trajectory[:, y_indices]) <= 1 and np.min(trajectory[:, y_indices]) >= 0
 
     return trajectory
 
 
 def scale_action(trajectory):
+    # scale to [0, 1]
     assert len(trajectory.shape) == 2
     # print(trajectory.shape)
     # print(trajectory[:, 0])

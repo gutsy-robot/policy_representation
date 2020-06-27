@@ -44,6 +44,8 @@ if generate:
     X_train, X_test, y_train, y_test = load_data(agent_ids, rollout_path, train_on_states, load_baits=load_baits)
     print("shape of X_train: ", X_train.shape)
     print("shape of y_train: ", y_train.shape)
+    print("shape of X_test: ", X_test.shape)
+    print("shape of y_test: ", y_test.shape)
 
     np.save(model_path + exp_name + '/X_train.npy', X_train)
     np.save(model_path + exp_name + '/y_train.npy', y_train)

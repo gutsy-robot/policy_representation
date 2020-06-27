@@ -9,7 +9,9 @@ To use this repo, clone it inside the [Team-Space-Fortress](https://github.com/t
 From inside of the root directory, do a:
 
     pip install -e .
-    
+
+- `pip install Keras` requires tensorflow >= 2.2
+
     
 Method
 --
