@@ -8,8 +8,8 @@ import time
 import logger
 
 class Classifier(nn.Module):
-    def __init__(self, input_dim=19, hidden_dim=8, bidirectional=True, num_layers=1, arch='LSTM',
-                classes=9, lr=0.01, device=torch.device('cpu')):
+    def __init__(self, input_dim=19, hidden_dim=8, bidirectional=True, num_layers=2, arch='GRU',
+                classes=9, lr=0.001, device=torch.device('cpu')):
         super().__init__()
         self.device = device
         self.classes = classes
@@ -96,3 +96,10 @@ class Classifier(nn.Module):
                 history_test_acc = test_acc
                 print("new record", history_test_acc)
                 torch.save(self.state_dict(), f'{logger.get_dir()}/models/e{e}_acc{test_acc*100:.0f}.pt')
+    
+    def infer(self, X_test):
+        X_test = torch.FloatTensor(X_test).to(self.device)
+        B, T, S = X_test.shape
+        logits = self.forward(X_test).reshape(B, T, -1) # (B*T, C)
+        probs = F.softmax(logits, dim=-1) # (B, T, C) entire trajectory
+        return probs.cpu().detach().numpy()

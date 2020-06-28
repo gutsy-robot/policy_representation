@@ -64,16 +64,41 @@ print("shape of y_test: ", y_test.shape)
 
 torch.set_num_threads(1)
 pid=os.getpid()
+np.set_printoptions(precision=3, suppress=True)
 device = torch.device(f"cuda:{v['cuda']}" if torch.cuda.is_available() and v['cuda'] >= 0 else "cpu")
 
-now = datetime.datetime.now(dateutil.tz.tzlocal())
-log_folder = logs_path + f'/classifier/' + now.strftime('%Y_%m_%d_%H_%M_%S')
-logger.configure(dir=log_folder)
-os.makedirs(log_folder +'/models', exist_ok=True)
-os.system(f'cp src/train_agent_classifier.py {log_folder}')
-os.system(f'cp {sys.argv[1]} {log_folder}/variant_{pid}.yml')
+if v['train']:
+    now = datetime.datetime.now(dateutil.tz.tzlocal())
+    log_folder = logs_path + f'/classifier/' + now.strftime('%Y_%m_%d_%H_%M_%S')
+    logger.configure(dir=log_folder)
+    os.makedirs(log_folder +'/models', exist_ok=True)
+    os.system(f'cp src/train_agent_classifier.py {log_folder}')
+    os.system(f'cp {sys.argv[1]} {log_folder}/variant_{pid}.yml')
 
-classifier = Classifier(classes=num_agents, device=device, **v['model'])
-classifier.learn(X_train, y_train, X_test, y_test, epoch=v['epoch'], batch_size=v['batch_size'])
+    classifier = Classifier(classes=num_agents, device=device, **v['model'])
+    classifier.learn(X_train, y_train, X_test, y_test, epoch=v['epoch'], batch_size=v['batch_size'])
 
+else:
+    classifier = Classifier(classes=num_agents, device=device, **v['model'])
+    classifier.load_state_dict(torch.load(os.path.join(logs_path, 'classifier', v['model_path'])))
+    probs = classifier.infer(X_test)
+
+    B, T, S = X_test.shape
+    acc = []
+    for t in range(T):  
+        acc.append((np.argmax(probs[:, t, :], 1) == y_test).mean())
+    plt.plot(acc)
+    plt.title('accuracy vs timestamp')
+    plt.xlabel('timestamp')
+    plt.ylabel('avg accuracy')
+    plt.savefig(f'imgs/logs/{exp_name}/acc_time.pdf')
+    plt.close()
+
+    sim = np.zeros((num_agents, num_agents))
+    cnt = np.zeros((num_agents, 1))
+    for n in range(B):
+        sim[y_test[n]] += probs[n, 1200] # the ending is less accurate?
+        cnt[y_test[n]] += 1
+    sim /= cnt
+    print(sim)
 
