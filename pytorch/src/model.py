@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import random
 import time
-import logger
+from utils import logger
 
 class Classifier(nn.Module):
     def __init__(self, input_dim=19, hidden_dim=8, bidirectional=True, num_layers=2, arch='GRU',

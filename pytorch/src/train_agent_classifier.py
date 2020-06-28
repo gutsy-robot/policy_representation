@@ -2,14 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os, sys
 from ruamel.yaml import YAML
-from policy_representation.utils import load_data, trajectory_from_json
+from utils import logger
+from utils.data import load_data, trajectory_from_json
+import datetime
+import dateutil.tz
 
 from model import Classifier
 import torch
-
-import logger
-import datetime
-import dateutil.tz
 
 yaml = YAML()
 v = yaml.load(open(sys.argv[1]))
