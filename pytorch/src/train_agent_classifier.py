@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os, sys
 from ruamel.yaml import YAML
-from policy_representation.utils import load_data
+from policy_representation.utils import load_data, trajectory_from_json
 
 from model import Classifier
 import torch
@@ -67,7 +67,7 @@ pid=os.getpid()
 np.set_printoptions(precision=3, suppress=True)
 device = torch.device(f"cuda:{v['cuda']}" if torch.cuda.is_available() and v['cuda'] >= 0 else "cpu")
 
-if v['train']:
+if v['mode'] == 'train':
     now = datetime.datetime.now(dateutil.tz.tzlocal())
     log_folder = logs_path + f'/classifier/' + now.strftime('%Y_%m_%d_%H_%M_%S')
     logger.configure(dir=log_folder)
@@ -78,7 +78,7 @@ if v['train']:
     classifier = Classifier(classes=num_agents, device=device, **v['model'])
     classifier.learn(X_train, y_train, X_test, y_test, epoch=v['epoch'], batch_size=v['batch_size'])
 
-else:
+elif v['mode'] == 'evaluate':
     classifier = Classifier(classes=num_agents, device=device, **v['model'])
     classifier.load_state_dict(torch.load(os.path.join(logs_path, 'classifier', v['model_path'])))
     probs = classifier.infer(X_test)
@@ -102,3 +102,5 @@ else:
     sim /= cnt
     print(sim)
 
+elif v['mode'] == 'human':
+    pass

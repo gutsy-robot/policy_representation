@@ -441,7 +441,7 @@ def getStateDict_Json(json_data):
     return state_dict
 
 
-def getStateArray(state_dict, bait_id=0, shells=False):
+def getStateArray(state_dict, bait_id=0, shells=True):
     state_array = -1 * np.ones((28,), np.float)
     state_array[:4] = np.array([
         state_dict['fortresses'][0][3],
