@@ -1,6 +1,7 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import os, sys
+import matplotlib.pyplot as plt
+from scipy.ndimage import uniform_filter
 from ruamel.yaml import YAML
 from utils import logger
 from utils.data import *
@@ -113,11 +114,26 @@ else:
         human_actions.append(actions)
     human_states = np.array(human_states)
     human_actions = np.array(human_actions)
-    
+
     human_data = np.concatenate([human_states, human_actions], axis=-1)
 
     classifier = Classifier(classes=num_agents, device=device, **v['model'])
     classifier.load_state_dict(torch.load(v['model_path'], map_location=device))
     probs = classifier.infer(human_data)
-    for i in range(probs.shape[0]):
+
+    B, T, C = probs.shape
+    for i in range(B):
         print(probs[i, :].mean(0))
+
+    # plot time curves
+    for b in range(B):
+        for i in range(num_agents):
+            data = uniform_filter(probs[b, :, i], 100)
+            plt.plot(data, label=i)
+            plt.text(np.argmax(data), np.max(data), str(i))
+        plt.xlabel('timestamp')
+        plt.ylabel('probs')
+        plt.show()
+        # plt.savefig(f'imgs/logs/{exp_name}/acc_time.pdf')
+        plt.close()
+    
