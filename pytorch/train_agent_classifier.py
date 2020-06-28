@@ -21,6 +21,11 @@ root_dir = v['root_dir']
 rollout_path = v['rollout_dir']
 exp_name = v['experiment_name']
 
+torch.set_num_threads(1)
+pid=os.getpid()
+np.set_printoptions(precision=3, suppress=True)
+device = torch.device(f"cuda:{v['cuda']}" if torch.cuda.is_available() and v['cuda'] >= 0 else "cpu")
+
 if v['mode'] != 'human':
     data_path = os.path.join(root_dir, 'data', exp_name)
     logs_path = os.path.join(root_dir, 'logs', exp_name)
@@ -63,11 +68,6 @@ if v['mode'] != 'human':
     print("shape of X_test: ", X_test.shape)
     print("shape of y_test: ", y_test.shape)
 
-    torch.set_num_threads(1)
-    pid=os.getpid()
-    np.set_printoptions(precision=3, suppress=True)
-    device = torch.device(f"cuda:{v['cuda']}" if torch.cuda.is_available() and v['cuda'] >= 0 else "cpu")
-
     if v['mode'] == 'train':
         now = datetime.datetime.now(dateutil.tz.tzlocal())
         log_folder = logs_path + f'/classifier/' + now.strftime('%Y_%m_%d_%H_%M_%S')
@@ -104,4 +104,20 @@ if v['mode'] != 'human':
         print(sim)
 
 else:
-    pass
+    human_path = "/home/tianwei/webtsf/server/disk/Yikang/turn_only_shooter_35/speed15"
+    traj = parseAllJson(human_path, 0)
+    human_states, human_actions = [], []
+    for (state, action) in traj:
+        states, actions = get_human_trajectory(state, action, True)
+        human_states.append(states)
+        human_actions.append(actions)
+    human_states = np.array(human_states)
+    human_actions = np.array(human_actions)
+    
+    human_data = np.concatenate([human_states, human_actions], axis=-1)
+
+    classifier = Classifier(classes=num_agents, device=device, **v['model'])
+    classifier.load_state_dict(torch.load(v['model_path'], map_location=device))
+    probs = classifier.infer(human_data)
+    for i in range(probs.shape[0]):
+        print(probs[i, :].mean(0))
