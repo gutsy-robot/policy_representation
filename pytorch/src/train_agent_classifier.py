@@ -80,7 +80,7 @@ if v['mode'] == 'train':
 
 elif v['mode'] == 'evaluate':
     classifier = Classifier(classes=num_agents, device=device, **v['model'])
-    classifier.load_state_dict(torch.load(os.path.join(logs_path, 'classifier', v['model_path'])))
+    classifier.load_state_dict(torch.load(os.path.join(v['model_path'])))
     probs = classifier.infer(X_test)
 
     B, T, S = X_test.shape

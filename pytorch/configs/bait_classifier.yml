@@ -7,7 +7,7 @@ agents: >-
   Turn_Only_Shooter5_Bait_Sid7 Turn_Only_Shooter5_Bait_Sid8 Turn_Only_Shooter5_Bait_Yikang0
   Turn_Only_Shooter5_Bait_Yikang1 Turn_Only_Shooter5_Bait_Yikang2 Turn_Only_Shooter5_Bait_Yikang3
   Turn_Only_Shooter5_Bait_Yikang4 Turn_Only_Shooter5_Bait_Yikang5 Turn_Only_Shooter5_Bait_Yikang6
-mode: human # [train, evaluate, human]
+mode: evaluate # [train, evaluate, human]
 cuda: 7
 epoch: 100
 batch_size: 200
@@ -18,4 +18,4 @@ model:
   num_layers: 2
   arch: GRU
   lr: 0.001
-model_path: 2020_06_28_10_45_00/models/e99_acc98.pt
+model_path: snapshots/2020_06_28_10_45_00_e99_acc98.pt
