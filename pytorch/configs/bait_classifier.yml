@@ -1,0 +1,20 @@
+root_dir: /serverdata/tianwei/policy_representation
+rollout_dir: /serverdata/tianwei/self_play_trajectories
+experiment_name: all_baits_Turn_Only_Shooter5
+load_baits: true
+generate: false
+agents: >-
+  Turn_Only_Shooter5_Bait_Sid7 Turn_Only_Shooter5_Bait_Sid8 Turn_Only_Shooter5_Bait_Yikang0
+  Turn_Only_Shooter5_Bait_Yikang1 Turn_Only_Shooter5_Bait_Yikang2 Turn_Only_Shooter5_Bait_Yikang3
+  Turn_Only_Shooter5_Bait_Yikang4 Turn_Only_Shooter5_Bait_Yikang5 Turn_Only_Shooter5_Bait_Yikang6
+
+cuda: 7
+epoch: 100
+batch_size: 200
+model:
+  input_dim: 19
+  hidden_dim: 8
+  bidirectional: true
+  num_layers: 2
+  arch: GRU
+  lr: 0.001
