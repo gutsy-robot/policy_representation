@@ -2,6 +2,8 @@ from heapq import heappop, heappush, heappushpop
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import json
 
 def dist_from_player(player_pos, projectile_pos):
     return np.linalg.norm(player_pos - projectile_pos)
@@ -42,8 +44,7 @@ def getStateDict_Json(json_data):
 
     return state_dict
 
-
-def getStateArray(state_dict, bait_id=0, shells=True):
+def getStateArray(state_dict, bait_id, shells=True):
     state_array = -1 * np.ones((28,), np.float)
     state_array[:4] = np.array([
         state_dict['fortresses'][0][3],
@@ -115,13 +116,12 @@ def getStateArray(state_dict, bait_id=0, shells=True):
                bool(action_array[5])]
     return state_array, actions
 
-
-def trajectory_from_json(log):
+def trajectory_from_json(log, bait_id, shells=True):
     ep_states, ep_actions = [], []
 
     for state in log['game_states']:
         json_data = getStateDict_Json(state)
-        states, actions = getStateArray(json_data)
+        states, actions = getStateArray(json_data, bait_id, shells)
         ep_states.append(states)
         ep_actions.append(actions)
 
@@ -130,20 +130,35 @@ def trajectory_from_json(log):
 
     return ep_states, ep_actions
 
+def parseAllJson(data_path: str, bait_id: int):
+	# data_path: absolute path
+    json_list = sorted(os.listdir(data_path))
+    trajs = []
+    for json_name in json_list:
+        if json_name[-5:] != '.json': continue
+        with open(os.path.join(data_path, json_name)) as f:
+        	json_data = json.load(f)
+        state, action = trajectory_from_json(json_data, bait_id=bait_id, shells=True)
+        trajs.append((state, action))
+        print(json_name, "shape", state.shape, action.shape)
 
-def get_agent_trajectory(episode_states, episode_actions, agent_id=1):
-    assert agent_id == 0 or agent_id == 1
-    if agent_id == 0:
-        agent_states = np.concatenate((episode_states[:, :10], episode_states[:,  16:19],
-                                       episode_states[:, 22:25]), axis=1)
-        agent_actions = episode_actions[:, :3]
+    return trajs
 
-    elif agent_id == 1:
-        agent_states = np.concatenate((episode_states[:, :4], episode_states[:, 10:16],
-                                       episode_states[:, 19:22], episode_states[:, 25:]), axis=1)
-        agent_actions = episode_actions[:, 3:]
+def get_human_trajectory(episode_states, episode_actions, bait: bool):
+    # assert human_id=0
+    if bait:
+        human_states = np.concatenate((episode_states[:, :10], 
+                                       episode_states[:,  16:22]), axis=1) # shells
+    else:
+        human_states = np.concatenate((episode_states[:, :10], 
+                                       episode_states[:, 22:28]), axis=1) # missiles
 
-    return agent_states, agent_actions
+    human_actions = episode_actions[:, :3]
+
+    human_states = scale_state(human_states)
+    human_actions = scale_action(human_actions)
+
+    return human_states, human_actions
 
 def load_data(agent_ids, agents_path, train_on_states_only=False, load_baits=True):
     """
