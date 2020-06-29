@@ -1,6 +1,8 @@
 import numpy as np
 import os, sys
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.style.use('seaborn')
 from scipy.ndimage import uniform_filter
 from ruamel.yaml import YAML
 from utils import logger
@@ -26,6 +28,39 @@ torch.set_num_threads(1)
 pid=os.getpid()
 np.set_printoptions(precision=3, suppress=True)
 device = torch.device(f"cuda:{v['cuda']}" if torch.cuda.is_available() and v['cuda'] >= 0 else "cpu")
+
+def infer_human(human_path):
+    print(human_path)
+    traj = parseAllJson(human_path, bait_id=0)
+    human_states, human_actions = [], []
+    for (state, action) in traj:
+        states, actions = get_human_trajectory(state, action, True)
+        human_states.append(states)
+        human_actions.append(actions)
+    human_states = np.array(human_states)
+    human_actions = np.array(human_actions)
+
+    human_data = np.concatenate([human_states, human_actions], axis=-1)
+    probs = classifier.infer(human_data)
+
+    B, T, C = probs.shape
+    for b in range(B):
+        print(b, probs[b, :].mean(0))
+
+    # plot time curves
+    for b in range(B):
+        print('traj', b)
+        for i in range(num_agents):
+            data = uniform_filter(probs[b, :, i], 100)
+            plt.plot(data, label=i)
+            plt.text(np.argmax(data), np.max(data), str(i), size='xx-large')
+        plt.title(f"{human_path[human_path.index('disk')+5:]}\n traj {b}")
+        plt.xlabel('timestamp')
+        plt.ylabel('probs')
+        plt.tight_layout()
+        plt.savefig(f'imgs/logs/{exp_name}/traj{b}.pdf')
+        plt.show()
+        plt.close()
 
 if v['mode'] != 'human':
     data_path = os.path.join(root_dir, 'data', exp_name)
@@ -82,7 +117,7 @@ if v['mode'] != 'human':
 
     elif v['mode'] == 'evaluate':
         classifier = Classifier(classes=num_agents, device=device, **v['model'])
-        classifier.load_state_dict(torch.load(os.path.join(v['model_path'])))
+        classifier.load_state_dict(torch.load(v['model_path'], map_location=device))
         probs = classifier.infer(X_test)
 
         B, T, S = X_test.shape
@@ -105,35 +140,12 @@ if v['mode'] != 'human':
         print(sim)
 
 else:
-    human_path = "/home/tianwei/webtsf/server/disk/Yikang/turn_only_shooter_35/speed15"
-    traj = parseAllJson(human_path, 0)
-    human_states, human_actions = [], []
-    for (state, action) in traj:
-        states, actions = get_human_trajectory(state, action, True)
-        human_states.append(states)
-        human_actions.append(actions)
-    human_states = np.array(human_states)
-    human_actions = np.array(human_actions)
-
-    human_data = np.concatenate([human_states, human_actions], axis=-1)
-
     classifier = Classifier(classes=num_agents, device=device, **v['model'])
     classifier.load_state_dict(torch.load(v['model_path'], map_location=device))
-    probs = classifier.infer(human_data)
 
-    B, T, C = probs.shape
-    for i in range(B):
-        print(probs[i, :].mean(0))
-
-    # plot time curves
-    for b in range(B):
-        for i in range(num_agents):
-            data = uniform_filter(probs[b, :, i], 100)
-            plt.plot(data, label=i)
-            plt.text(np.argmax(data), np.max(data), str(i))
-        plt.xlabel('timestamp')
-        plt.ylabel('probs')
-        plt.show()
-        # plt.savefig(f'imgs/logs/{exp_name}/acc_time.pdf')
-        plt.close()
+    # demo
+    path = "/home/tianwei/webtsf/server/disk/tianwein"
+    for shooter in ['mirror_shooter_15', 'mirror_shooter_30', 'turn_only_shooter_25', 'turn_only_shooter_35', 'turn_only_shooter_45']:
+        for bait in ['bait_sid1', 'bait_sid2', 'bait_yikang']:
+            infer_human(os.path.join(path,shooter,bait))
     
