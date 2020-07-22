@@ -11,11 +11,11 @@ class ASM():
 	def __init__(self):
 		model_path = 'models/ae.h5'
 		self.model = load_model(model_path)
-	def generateEmbedding(self,state_action):
-		trajectory_json = json.dumps([json.loads(frame.toJsonString()) for frame in states])
+	def generateEmbedding(self,states):
+		trajectory_json = {"game_states":[json.loads(frame.toJsonString()e) for frame in states]}
 		states, actions = trajectory_from_json(log)
 		# extract the state, actions for the agent_id(0 or 1) you wish to calculate the embeddings for.
-		agent_states, agent_actions = get_agent_trajectory(states, actions, agent_id=agent_id)
+		agent_states, agent_actions = get_agent_trajectory(states, actions, agent_id=1) #todo make sure this is right
 		# scale the state and actions.
 		agent_states, agent_actions = scale_state(agent_states), scale_action(agent_actions)
 		use_actions = model.layers[0].input_shape[-1] == 19
@@ -25,3 +25,4 @@ class ASM():
 		    inp = agent_states
 		input = inp.reshape((1, input.shape[0], input.shape[1]))
 		embedding = model.predict(input)
+		return embedding
