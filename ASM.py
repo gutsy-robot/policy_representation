@@ -1,7 +1,7 @@
 import json
-from policy_representation.utils import scale_action, scale_state
+from .policy_representation.utils import scale_action, scale_state
 from keras.models import load_model
-from policy_representation.utils import trajectory_from_json, get_agent_trajectory
+from .policy_representation.utils import trajectory_from_json, get_agent_trajectory
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +12,7 @@ class ASM():
 		model_path = 'models/ae.h5'
 		self.model = load_model(model_path)
 	def generateEmbedding(self,states):
-		trajectory_json = {"game_states":[json.loads(frame.toJsonString()e) for frame in states]}
+		trajectory_json = {"game_states":[json.loads(frame.toJsonString()) for frame in states]}
 		states, actions = trajectory_from_json(log)
 		# extract the state, actions for the agent_id(0 or 1) you wish to calculate the embeddings for.
 		agent_states, agent_actions = get_agent_trajectory(states, actions, agent_id=1) #todo make sure this is right
