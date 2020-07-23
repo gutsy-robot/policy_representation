@@ -23,6 +23,5 @@ class ASM():
 		    inp = np.hstack((agent_states, agent_actions))
 		else:
 		    inp = agent_states
-		input = inp.reshape((1, input.shape[0], input.shape[1]))
-		embedding = model.predict(input)
+		embedding = model.predict(inp.reshape((1, inp.shape[0], inp.shape[1])))
 		return embedding
