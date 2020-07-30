@@ -12,21 +12,17 @@ class ASM():
 		model_path = '/home/suhas/webtsf/server/agents/policy_representation/models/ae.h5'
 		self.model = load_model(model_path)
 	def generateEmbedding(self,states):
-		print("Generating Embedding")
-		print(states)
-		trajectory_json = {"game_states":[json.loads(frame.toJsonString()) for frame in states]}
-		print(trajectory_json)
+		trajectory_json = {"game_states":states}
 		states, actions = trajectory_from_json(trajectory_json)
 		# extract the state, actions for the agent_id(0 or 1) you wish to calculate the embeddings for.
 		agent_states, agent_actions = get_agent_trajectory(states, actions, agent_id=1) #todo make sure this is right
 		# scale the state and actions.
 		agent_states, agent_actions = scale_state(agent_states), scale_action(agent_actions)
 		use_actions = self.model.layers[0].input_shape[-1] == 19
-		print("got trajectories correctly")
-		print("use actions is {}".format(use_actions))
 		if use_actions:
 		    inp = np.hstack((agent_states, agent_actions))
 		else:
 		    inp = agent_states
 		embedding = self.model.predict(inp.reshape((1, inp.shape[0], inp.shape[1])))
 		return embedding
+
