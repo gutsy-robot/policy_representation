@@ -8,8 +8,11 @@ import numpy as np
 import pickle
 
 class ASM():
-	def __init__(self):
-		model_path = '/home/suhas/webtsf/server/agents/policy_representation/models/ae.h5'
+	def __init__(self, role = 'S'):
+		if role=='S':
+			model_path = '/home/suhas/webtsf/server/agents/policy_representation/models/bait_identifier.h5'
+		else:
+			model_path = '/home/suhas/webtsf/server/agents/policy_representation/models/shooter_identifier.h5'
 		self.model = load_model(model_path)
 	def generateEmbedding(self,states):
 		trajectory_json = {"game_states":states}
