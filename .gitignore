@@ -2,3 +2,6 @@
 __pycache__/
 .ipynb_checkpoints
 *.ipynb
+shooters_gdr/
+baits_gdr/
+.DS_Store
