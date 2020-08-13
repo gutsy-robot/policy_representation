@@ -1,19 +1,19 @@
 import json
 from .policy_representation.utils import scale_action, scale_state
-from keras.models import load_model
 from .policy_representation.utils import trajectory_from_json, get_agent_trajectory
-from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
+from keras.models import load_model
 import numpy as np
 import pickle
+
+shooter_model = load_model('policy_representation/models/bait_identifier.h5')
+bait_model = load_model('policy_representation/models/shooter_identifier0.h5')
 
 class ASM():
 	def __init__(self, role = 'S'):
 		if role=='S':
-			model_path = '/home/suhas/webtsf/server/agents/policy_representation/models/bait_identifier.h5'
+			self.model = shooter_model
 		else:
-			model_path = '/home/suhas/webtsf/server/agents/policy_representation/models/shooter_identifier0.h5'
-		self.model = load_model(model_path)
+			self.model = bait_model
 	def generateEmbedding(self,states):
 		trajectory_json = {"game_states":states}
 		states, actions = trajectory_from_json(trajectory_json)
